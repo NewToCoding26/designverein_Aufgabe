@@ -9,15 +9,20 @@ body {
     justify-content: center;
 }
 
+.contact-results{
+    position: relative;
+    width: 98%;
+    margin: 0 auto;
+}
+
 .data-table {
     width: 98%;
     margin: 0 auto;
     border-collapse: separate;
     border-spacing: 0;
-}
-
-table {
     border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
 }
 
 thead th {
@@ -26,16 +31,6 @@ thead th {
     background-color: #04AA6D;
     padding: 12px;
     border: none;
-}
-
-thead th:first-child {
-    border-top-left-radius: 8px;
-    border-bottom-left-radius: 8px;
-}
-
-thead th:last-child {
-    border-top-right-radius: 8px;
-    border-bottom-right-radius: 8px;
 }
 
 td {
@@ -53,12 +48,18 @@ tbody tr:hover {
     background-color: #7e4a4ac0;
 }
 
-button {
-    position: absolute;
-    right: 0;
-    margin: 0.5rem;
-    padding: 0.5rem 1rem;
+.search-box{
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
+    gap: 0.5rem;
     font-family: sans-serif;
     font-size: 1.2rem;
     cursor: pointer;
+}
+
+.search-box select, .search-box input, .search-box button{
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    padding: 6px 10px;
 }
