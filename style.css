@@ -62,4 +62,28 @@ tbody tr:hover {
     border-radius: 8px;
     border: 1px solid #ccc;
     padding: 6px 10px;
+    color: white;
+    background-color: #04AA6D;
+}
+
+#input-search::placeholder{
+    color: white;
+}
+
+.sort-icon{
+    font-size: 1rem;
+    vertical-align: middle;
+    margin-left: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    opacity: 0.5;
+}
+
+th:hover .sort-icon{
+    opacity: 1;
+}
+
+.sort-icon.active{
+    opacity: 1;
+    color: black;
 }

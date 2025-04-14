@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <title>Contact Database</title>
     <link rel="stylesheet" href="style.css">
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
     
 </head>
 <body>
@@ -12,11 +14,11 @@
         <table class="data-table">
             <thead>
                 <tr>
-                    <th>Name</th>
-                    <th>Street</th>
-                    <th>City</th>
-                    <th>Zip</th>
-                    <th>Tel</th>
+                    <th data-column="name" data-type="string"> Name <ion-icon class="sort-icon" name="arrow-down"></ion-icon></th>
+                    <th data-column="street" data-type="string"> Street <ion-icon class="sort-icon" name="arrow-down"></ion-icon></th>
+                    <th data-column="city" data-type="string"> City <ion-icon class="sort-icon" name="arrow-down"></ion-icon></th>
+                    <th data-column="zip" data-clean="number"> Zip <ion-icon class="sort-icon" name="arrow-down"></ion-icon></th>
+                    <th data-column="tel" data-clean="number"> Tel <ion-icon class="sort-icon" name="arrow-down"></ion-icon></th>
                 </tr>
             </thead>
             <tbody>
@@ -29,41 +31,36 @@
                 </tr>
             
                 <tr>
-                    <td>Anna</td>
-                    <td>Avenue Street 3</td>
-                    <td>New York</td>
-                    <td>307899</td>
-                    <td>01232 7849302</td>
-                </tr>
-            
-                <tr>
-                    <td>Anna</td>
-                    <td>Avenue Street 3</td>
-                    <td>New York</td>
-                    <td>307899</td>
-                    <td>01232 7849302</td>
+                    <td>Bnna</td>
+                    <td>Bvenue Street 3</td>
+                    <td>Bew York</td>
+                    <td>107899</td>
+                    <td>21232 7849302</td>
                 </tr>
 
                 <tr>
-                    <td>Anna</td>
-                    <td>Avenue Street 3</td>
-                    <td>New York</td>
-                    <td>307899</td>
-                    <td>01232 7849302</td>
+                    <td>Cnna</td>
+                    <td>Cvenue Street 3</td>
+                    <td>Cew York</td>
+                    <td>207899</td>
+                    <td>11232 7849302</td>
                 </tr>
             </tbody>
         </table>
 
         <div class="search-box">
             <select id="search-field"> 
-             <option value="city">Name</option>
-             <option value="city">Street</option>
+             <option value="name">Name</option>
+             <option value="street">Street</option>
              <option value="city">City</option>
-             <option value="city">Zip</option>
-             <option value="city">Tel</option>
+             <option value="zip">Zip</option>
+             <option value="tel">Tel</option>
            </select> 
              <input type="text" id="input-search" placeholder="Find contacts..."> 
              <button id="button-search">Search</button>
+             <label>
+                <input type="checkbox" id="exact-match"> Exakte Suche
+            </label>            
          </div>
          
     </section>
