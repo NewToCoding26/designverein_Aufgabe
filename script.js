@@ -1,92 +1,159 @@
 document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('th').forEach(th => {
-        const icon = th.querySelector('.sort-icon');
-        let sortOrder = 1;
-        
-        th.addEventListener('click', () => {
-            document.querySelectorAll('.sort-icon').forEach(i => {
-                i.name = 'arrow-down';
-                i.classList.remove('active');
-            });
-            
-            icon.name = sortOrder === 1 ? 'arrow-up' : 'arrow-down';
-            icon.classList.add('active');
-            
-            const columnIndex = Array.from(th.parentNode.children).indexOf(th);
-            const tbody = th.closest('table').querySelector('tbody');
-            const rows = Array.from(tbody.querySelectorAll('tr'));
-            
-            rows.sort((a, b) => {
-                const aText = a.children[columnIndex].textContent.trim();
-                const bText = b.children[columnIndex].textContent.trim();
-                
-                if (th.dataset.clean === 'number') {
-                    return (parseInt(aText) - parseInt(bText)) * sortOrder;
-                }
-                return aText.localeCompare(bText) * sortOrder;
-            });
-            
-            rows.forEach(row => tbody.appendChild(row));
-            sortOrder *= -1;
-        });
+    const searchButton = document.getElementById('button-search');
+    const searchInput = document.getElementById('input-search');
+    const searchField = document.getElementById('search-field');
+    const exactMatch = document.getElementById('exact-match');
+    const resultsBody = document.getElementById('results-body');
+    const noResultsMessage = document.getElementById('no-results');
+    const spinner = document.querySelector('.spinner');
+    const buttonText = document.querySelector('.button-text');
+
+    let currentData = [];
+    let currentSort = {
+        column: null,
+        direction: 'asc'
+    };
+
+    document.querySelectorAll('.sort-icon').forEach(icon => {
+        icon.classList.add('active');
     });
 
-    document.getElementById('input-search').addEventListener('keypress', (e) => {
+    searchButton.addEventListener('click', performSearch);
+    searchInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') performSearch();
     });
 
-    document.getElementById('button-search').addEventListener('click', performSearch);
+    document.querySelectorAll('th').forEach(th => {
+        th.addEventListener('click', () => {
+            const column = th.dataset.column;
+            const icon = th.querySelector('.sort-icon');
+            
+            document.querySelectorAll('.sort-icon').forEach(otherIcon => {
+                if (otherIcon !== icon) {
+                    otherIcon.classList.remove('asc', 'desc');
+                }
+            });
+
+            if (currentSort.column === column) {
+                currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentSort.column = column;
+                currentSort.direction = 'asc';
+            }
+
+            icon.classList.remove('asc', 'desc');
+            icon.classList.add(currentSort.direction);
+
+            if (currentData.length > 0) {
+                sortData();
+                updateTable();
+            }
+        });
+    });
 
     async function performSearch() {
-        const criteria = document.getElementById('input-search').value.trim();
-        const exactMatch = document.getElementById('exact-match').checked;
+        const searchTerm = searchInput.value.trim();
+        const field = searchField.value;
+        const isExactMatch = exactMatch.checked;
 
-        if (!criteria) {
+        if (!searchTerm) {
             alert('Please enter a search term');
             return;
         }
 
         try {
+            searchButton.disabled = true;
+            spinner.classList.remove('hidden');
+            buttonText.classList.add('hidden');
+
+            const requestData = {
+                user: "api_azubi_test",
+                password: "dUb0SkqWH6MHXSsBAKkHmvJa",
+                field: field,
+                criteria: searchTerm,
+                condition: isExactMatch ? 'equals' : 'like'
+            };
+
             const response = await fetch("https://azubi.dv-test.de/search/", {
                 method: "POST",
                 headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
+                    'Content-Type': 'application/json'
                 },
-                body: `data=${encodeURIComponent(JSON.stringify({
-                    user: "api_azubi_test",
-                    password: "dUb0SkqWH6MHXSsBAKkHmvJa",
-                    field: "city",
-                    criteria: criteria,
-                    condition: exactMatch ? 'equals' : 'like'
-                }))}`
+                body: JSON.stringify(requestData)
             });
 
             const data = await response.json();
-            updateTable(data);
+
+            if (data.error) {
+                throw new Error(data.error);
+            }
+
+            currentData = Array.isArray(data) ? data : [];
+            currentSort.column = null;
+            currentSort.direction = 'asc';
+
+            document.querySelectorAll('.sort-icon').forEach(icon => {
+                icon.classList.remove('asc', 'desc');
+            });
+
+            updateTable();
+            
+            if (currentData.length === 0) {
+                noResultsMessage.classList.remove('hidden');
+            } else {
+                noResultsMessage.classList.add('hidden');
+            }
+
         } catch (error) {
-            console.error("Error:", error);
-            alert("Search failed. See console.");
+            console.error('Search error:', error);
+            alert(`Search failed: ${error.message}`);
+            resultsBody.innerHTML = '';
+            noResultsMessage.classList.remove('hidden');
+        } finally {
+            searchButton.disabled = false;
+            spinner.classList.add('hidden');
+            buttonText.classList.remove('hidden');
         }
     }
 
-    function updateTable(contacts) {
-        const tbody = document.querySelector('.data-table tbody');
-        tbody.innerHTML = '';
+    function sortData() {
+        if (!currentSort.column) return;
 
-        if (Array.isArray(contacts) && contacts.length > 0) {
-            contacts.forEach(contact => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${contact.name}</td>
-                    <td>${contact.street}</td>
-                    <td>${contact.city}</td>
-                    <td>${contact.zip}</td>
-                    <td>${contact.tel}</td>
-                `;
-                tbody.appendChild(row);
-            });
-        } else {
-            alert("No contacts found");
+        currentData.sort((a, b) => {
+            const aValue = a[currentSort.column];
+            const bValue = b[currentSort.column];
+
+            if (currentSort.column === 'zip') {
+                const numA = parseInt(aValue);
+                const numB = parseInt(bValue);
+                return currentSort.direction === 'asc' ? numA - numB : numB - numA;
+            }
+
+            const comparison = aValue.localeCompare(bValue);
+            return currentSort.direction === 'asc' ? comparison : -comparison;
+        });
+    }
+
+    function updateTable() {
+        resultsBody.innerHTML = '';
+
+        if (currentData.length === 0) {
+            noResultsMessage.classList.remove('hidden');
+            return;
         }
+
+        noResultsMessage.classList.add('hidden');
+
+        currentData.forEach(contact => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${contact.name || '-'}</td>
+                <td>${contact.street || '-'}</td>
+                <td>${contact.city || '-'}</td>
+                <td>${contact.zip || '-'}</td>
+                <td>${contact.tel || '-'}</td>
+            `;
+            resultsBody.appendChild(row);
+        });
     }
 });

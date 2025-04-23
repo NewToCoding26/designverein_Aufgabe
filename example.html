@@ -2,71 +2,53 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Contact Database</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Database Search</title>
     <link rel="stylesheet" href="style.css">
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
-    
 </head>
 <body>
-
-    <section class="contact-results">
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th data-column="name" data-type="string"> Name <ion-icon class="sort-icon" name="arrow-down"></ion-icon></th>
-                    <th data-column="street" data-type="string"> Street <ion-icon class="sort-icon" name="arrow-down"></ion-icon></th>
-                    <th data-column="city" data-type="string"> City <ion-icon class="sort-icon" name="arrow-down"></ion-icon></th>
-                    <th data-column="zip" data-clean="number"> Zip <ion-icon class="sort-icon" name="arrow-down"></ion-icon></th>
-                    <th data-column="tel" data-clean="number"> Tel <ion-icon class="sort-icon" name="arrow-down"></ion-icon></th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>Anna</td>
-                    <td>Avenue Street 3</td>
-                    <td>New York</td>
-                    <td>307899</td>
-                    <td>01232 7849302</td>
-                </tr>
-            
-                <tr>
-                    <td>Bnna</td>
-                    <td>Bvenue Street 3</td>
-                    <td>Bew York</td>
-                    <td>107899</td>
-                    <td>21232 7849302</td>
-                </tr>
-
-                <tr>
-                    <td>Cnna</td>
-                    <td>Cvenue Street 3</td>
-                    <td>Cew York</td>
-                    <td>207899</td>
-                    <td>11232 7849302</td>
-                </tr>
-            </tbody>
-        </table>
-
+    <div class="container">
+        <h1>Contact Database Search</h1>
+        
         <div class="search-box">
-            <select id="search-field"> 
-             <option value="name">Name</option>
-             <option value="street">Street</option>
-             <option value="city">City</option>
-             <option value="zip">Zip</option>
-             <option value="tel">Tel</option>
-           </select> 
-             <input type="text" id="input-search" placeholder="Find contacts..."> 
-             <button id="button-search">Search</button>
-             <label>
-                <input type="checkbox" id="exact-match"> Exakte Suche
-            </label>            
-         </div>
-         
-    </section>
+            <select id="search-field">
+                <option value="name">Name</option>
+                <option value="street">Street</option>
+                <option value="city">City</option>
+                <option value="zip">Zip</option>
+                <option value="tel">Telephone</option>
+            </select>
+            <input type="text" id="input-search" placeholder="Enter search term...">
+            <button id="button-search">
+                <span class="button-text">Search</span>
+                <span class="spinner hidden"></span>
+            </button>
+            <label class="checkbox-label">
+                <input type="checkbox" id="exact-match"> Exact match
+            </label>
+        </div>
+
+        <div class="results-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th data-column="name">Name <ion-icon class="sort-icon" name="arrow-down"></ion-icon></th>
+                        <th data-column="street">Street <ion-icon class="sort-icon" name="arrow-down"></ion-icon></th>
+                        <th data-column="city">City <ion-icon class="sort-icon" name="arrow-down"></ion-icon></th>
+                        <th data-column="zip">Zip <ion-icon class="sort-icon" name="arrow-down"></ion-icon></th>
+                        <th data-column="tel">Telephone <ion-icon class="sort-icon" name="arrow-down"></ion-icon></th>
+                    </tr>
+                </thead>
+                <tbody id="results-body">
+                    
+                </tbody>
+            </table>
+            <div id="no-results" class="hidden">No contacts found. Try a different search term.</div>
+        </div>
+    </div>
 
     <script src="script.js"></script>
 </body>
 </html>
-
-

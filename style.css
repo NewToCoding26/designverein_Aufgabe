@@ -1,89 +1,165 @@
 body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin: 0;
-    font-family: sans-serif;
-    font-size: 1.4rem;
-    position: relative;
-    min-height: 40vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
+    padding: 20px;
+    background-color: #f5f5f5;
+    color: #333;
 }
 
-.contact-results{
-    position: relative;
-    width: 98%;
+.container {
+    max-width: 1200px;
     margin: 0 auto;
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    color: #2c3e50;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.search-box {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.search-box select, 
+.search-box input {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+.search-box input {
+    flex-grow: 1;
+    min-width: 200px;
+}
+
+#button-search {
+    padding: 10px 20px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+}
+
+#button-search:hover {
+    background-color: #2980b9;
+}
+
+#button-search:disabled {
+    background-color: #95a5a6;
+    cursor: not-allowed;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
 }
 
 .data-table {
-    width: 98%;
-    margin: 0 auto;
-    border-collapse: separate;
-    border-spacing: 0;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    overflow: hidden;
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
 }
 
-thead th {
-    height: 35px;
+.data-table th {
+    background-color: #3498db;
     color: white;
-    background-color: #04AA6D;
     padding: 12px;
-    border: none;
-}
-
-td {
-    height: 21px;
-    padding: 12px;
-    text-align: center;
-    border: none;
-}
-
-tr:nth-child(even) {
-    background-color: #c1c1c1;
-}
-
-tbody tr:hover {
-    background-color: #7e4a4ac0;
-}
-
-.search-box{
-    display: flex;
-    justify-content: flex-end;
-    margin-top: 10px;
-    gap: 0.5rem;
-    font-family: sans-serif;
-    font-size: 1.2rem;
+    text-align: left;
     cursor: pointer;
+    position: relative;
 }
 
-.search-box select, .search-box input, .search-box button{
-    border-radius: 8px;
-    border: 1px solid #ccc;
-    padding: 6px 10px;
-    color: white;
-    background-color: #04AA6D;
+.data-table th:hover {
+    background-color: #2980b9;
 }
 
-#input-search::placeholder{
-    color: white;
+.data-table td {
+    padding: 12px;
+    border-bottom: 1px solid #ddd;
 }
 
-.sort-icon{
-    font-size: 1rem;
-    vertical-align: middle;
+.data-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.data-table tr:hover {
+    background-color: #f1f1f1;
+}
+
+.sort-icon {
+    font-size: 14px;
     margin-left: 5px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    opacity: 0.5;
+    transition: transform 0.2s;
 }
 
-th:hover .sort-icon{
-    opacity: 1;
+.sort-icon.active {
+    color: #f1c40f;
 }
 
-.sort-icon.active{
-    opacity: 1;
-    color: black;
+.sort-icon.asc {
+    transform: rotate(0deg);
+}
+
+.sort-icon.desc {
+    transform: rotate(180deg);
+}
+
+#no-results {
+    text-align: center;
+    padding: 20px;
+    color: #7f8c8d;
+    font-style: italic;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.spinner {
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top: 2px solid white;
+    width: 16px;
+    height: 16px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@media (max-width: 768px) {
+    .search-box {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .search-box select, 
+    .search-box input,
+    #button-search {
+        width: 100%;
+    }
+    
+    .checkbox-label {
+        justify-content: center;
+    }
 }
