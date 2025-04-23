@@ -5,18 +5,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const exactMatch = document.getElementById('exact-match');
     const resultsBody = document.getElementById('results-body');
     const noResultsMessage = document.getElementById('no-results');
-    const spinner = document.querySelector('.spinner');
-    const buttonText = document.querySelector('.button-text');
 
     let currentData = [];
     let currentSort = {
         column: null,
-        direction: 'asc'
+        direction: 1 
     };
-
-    document.querySelectorAll('.sort-icon').forEach(icon => {
-        icon.classList.add('active');
-    });
 
     searchButton.addEventListener('click', performSearch);
     searchInput.addEventListener('keypress', (e) => {
@@ -30,19 +24,20 @@ document.addEventListener('DOMContentLoaded', () => {
             
             document.querySelectorAll('.sort-icon').forEach(otherIcon => {
                 if (otherIcon !== icon) {
-                    otherIcon.classList.remove('asc', 'desc');
+                    otherIcon.name = 'arrow-down';
+                    otherIcon.classList.remove('active');
                 }
             });
 
             if (currentSort.column === column) {
-                currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+                currentSort.direction *= -1;
             } else {
                 currentSort.column = column;
-                currentSort.direction = 'asc';
+                currentSort.direction = 1;
             }
 
-            icon.classList.remove('asc', 'desc');
-            icon.classList.add(currentSort.direction);
+            icon.name = currentSort.direction === 1 ? 'arrow-up' : 'arrow-down';
+            icon.classList.add('active');
 
             if (currentData.length > 0) {
                 sortData();
@@ -52,48 +47,47 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     async function performSearch() {
-        const searchTerm = searchInput.value.trim();
+        const criteria = searchInput.value.trim();
         const field = searchField.value;
         const isExactMatch = exactMatch.checked;
 
-        if (!searchTerm) {
+        if (!criteria) {
             alert('Please enter a search term');
             return;
         }
 
         try {
             searchButton.disabled = true;
-            spinner.classList.remove('hidden');
-            buttonText.classList.add('hidden');
-
-            const requestData = {
-                user: "api_azubi_test",
-                password: "dUb0SkqWH6MHXSsBAKkHmvJa",
-                field: field,
-                criteria: searchTerm,
-                condition: isExactMatch ? 'equals' : 'like'
-            };
+            const originalText = searchButton.textContent;
+            searchButton.innerHTML = `<span class="button-text">Searching...</span><span class="spinner"></span>`;
 
             const response = await fetch("https://azubi.dv-test.de/search/", {
                 method: "POST",
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(requestData)
+                body: JSON.stringify({
+                    user: "api_azubi_test",
+                    password: "dUb0SkqWH6MHXSsBAKkHmvJa",
+                    field: field,
+                    criteria: criteria,
+                    condition: isExactMatch ? 'equals' : 'like'
+                })
             });
 
             const data = await response.json();
-
+            
             if (data.error) {
                 throw new Error(data.error);
             }
-
+            
             currentData = Array.isArray(data) ? data : [];
             currentSort.column = null;
-            currentSort.direction = 'asc';
-
+            currentSort.direction = 1;
+            
             document.querySelectorAll('.sort-icon').forEach(icon => {
-                icon.classList.remove('asc', 'desc');
+                icon.name = 'arrow-down';
+                icon.classList.remove('active');
             });
 
             updateTable();
@@ -105,14 +99,13 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
         } catch (error) {
-            console.error('Search error:', error);
+            console.error("Error:", error);
             alert(`Search failed: ${error.message}`);
             resultsBody.innerHTML = '';
             noResultsMessage.classList.remove('hidden');
         } finally {
             searchButton.disabled = false;
-            spinner.classList.add('hidden');
-            buttonText.classList.remove('hidden');
+            searchButton.textContent = 'Search';
         }
     }
 
@@ -122,27 +115,16 @@ document.addEventListener('DOMContentLoaded', () => {
         currentData.sort((a, b) => {
             const aValue = a[currentSort.column];
             const bValue = b[currentSort.column];
-
+                
             if (currentSort.column === 'zip') {
-                const numA = parseInt(aValue);
-                const numB = parseInt(bValue);
-                return currentSort.direction === 'asc' ? numA - numB : numB - numA;
+                return (parseInt(aValue) - parseInt(bValue)) * currentSort.direction;
             }
-
-            const comparison = aValue.localeCompare(bValue);
-            return currentSort.direction === 'asc' ? comparison : -comparison;
+            return aValue.localeCompare(bValue) * currentSort.direction;
         });
     }
 
     function updateTable() {
         resultsBody.innerHTML = '';
-
-        if (currentData.length === 0) {
-            noResultsMessage.classList.remove('hidden');
-            return;
-        }
-
-        noResultsMessage.classList.add('hidden');
 
         currentData.forEach(contact => {
             const row = document.createElement('tr');
