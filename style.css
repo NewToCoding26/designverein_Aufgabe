@@ -13,6 +13,8 @@ body {
     position: relative;
     width: 98%;
     margin: 0 auto;
+    display: flex;
+    flex-direction: column;
 }
 
 .data-table {
@@ -52,12 +54,13 @@ tbody tr:hover {
 .search-box {
     display: flex;
     justify-content: flex-end;
-    margin-top: 10px;
+    margin-top: 20px;
     gap: 0.5rem;
     font-family: sans-serif;
     font-size: 1.2rem;
     cursor: pointer;
-    margin-bottom: 20px;
+    align-self: flex-end;
+    width: 98%;
 }
 
 .search-box select, 
@@ -93,12 +96,6 @@ th:hover .sort-icon {
     color: black;
 }
 
-/* Neue hinzugefügte Styles */
-#button-search:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
-}
-
 .checkbox-label {
     display: flex;
     align-items: center;
@@ -115,20 +112,4 @@ th:hover .sort-icon {
 
 .hidden {
     display: none !important;
-}
-
-.spinner {
-    display: inline-block;
-    width: 16px;
-    height: 16px;
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    border-radius: 50%;
-    border-top: 2px solid white;
-    animation: spin 1s linear infinite;
-    margin-left: 8px;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
 }

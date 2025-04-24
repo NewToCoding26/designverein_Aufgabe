@@ -9,21 +9,6 @@
 </head>
 <body>
     <section class="contact-results">
-        <div class="search-box">
-            <select id="search-field"> 
-                <option value="name">Name</option>
-                <option value="street">Street</option>
-                <option value="city">City</option>
-                <option value="zip">Zip</option>
-                <option value="tel">Tel</option>
-            </select> 
-            <input type="text" id="input-search" placeholder="Find contacts..."> 
-            <button id="button-search">Search</button>
-            <label class="checkbox-label">
-                <input type="checkbox" id="exact-match"> Exact match
-            </label>            
-        </div>
-
         <table class="data-table">
             <thead>
                 <tr>
@@ -38,6 +23,20 @@
             </tbody>
         </table>
         <div id="no-results" class="hidden">No contacts found. Try a different search term.</div>
+        
+        <div class="search-box">
+            <select id="search-field"> 
+                <option value="name">Name</option>
+                <option value="street">Street</option>
+                <option value="city">City</option>
+                <option value="zip">Zip</option>
+                <option value="tel">Tel</option>
+            </select> 
+            <input type="text" id="input-search" placeholder="Find contacts..."> 
+            <label class="checkbox-label">
+                <input type="checkbox" id="exact-match"> Exact match
+            </label>            
+        </div>
     </section>
 
     <script src="script.js"></script>

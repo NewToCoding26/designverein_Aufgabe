@@ -1,141 +1,108 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const searchButton = document.getElementById('button-search');
     const searchInput = document.getElementById('input-search');
     const searchField = document.getElementById('search-field');
     const exactMatch = document.getElementById('exact-match');
     const resultsBody = document.getElementById('results-body');
     const noResultsMessage = document.getElementById('no-results');
+    const tableHeaders = document.querySelectorAll('th[data-column]');
 
     let currentData = [];
     let currentSort = {
         column: null,
-        direction: 1 
+        direction: 1
     };
 
-    searchButton.addEventListener('click', performSearch);
-    searchInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') performSearch();
-    });
-
-    document.querySelectorAll('th').forEach(th => {
-        th.addEventListener('click', () => {
-            const column = th.dataset.column;
-            const icon = th.querySelector('.sort-icon');
-            
-            document.querySelectorAll('.sort-icon').forEach(otherIcon => {
-                if (otherIcon !== icon) {
-                    otherIcon.name = 'arrow-down';
-                    otherIcon.classList.remove('active');
-                }
-            });
-
-            if (currentSort.column === column) {
-                currentSort.direction *= -1;
-            } else {
-                currentSort.column = column;
-                currentSort.direction = 1;
-            }
-
-            icon.name = currentSort.direction === 1 ? 'arrow-up' : 'arrow-down';
-            icon.classList.add('active');
-
-            if (currentData.length > 0) {
-                sortData();
-                updateTable();
-            }
-        });
-    });
-
-    async function performSearch() {
+    function searchContacts() {
         const criteria = searchInput.value.trim();
         const field = searchField.value;
-        const isExactMatch = exactMatch.checked;
+        const condition = exactMatch.checked ? 'equals' : 'like';
 
-        if (!criteria) {
-            alert('Please enter a search term');
-            return;
-        }
+        if (!criteria) return;
 
-        try {
-            searchButton.disabled = true;
-            const originalText = searchButton.textContent;
-            searchButton.innerHTML = `<span class="button-text">Searching...</span><span class="spinner"></span>`;
+        const payload = {
+            user: "api_azubi_test",
+            password: "dUb0SkqWH6MHXSsBAKkHmvJa",
+            field,
+            criteria,
+            condition
+        };
 
-            const response = await fetch("https://azubi.dv-test.de/search/", {
-                method: "POST",
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    user: "api_azubi_test",
-                    password: "dUb0SkqWH6MHXSsBAKkHmvJa",
-                    field: field,
-                    criteria: criteria,
-                    condition: isExactMatch ? 'equals' : 'like'
-                })
-            });
-
-            const data = await response.json();
-            
-            if (data.error) {
-                throw new Error(data.error);
-            }
-            
-            currentData = Array.isArray(data) ? data : [];
-            currentSort.column = null;
-            currentSort.direction = 1;
-            
-            document.querySelectorAll('.sort-icon').forEach(icon => {
-                icon.name = 'arrow-down';
-                icon.classList.remove('active');
-            });
-
-            updateTable();
-            
-            if (currentData.length === 0) {
+        fetch('https://azubi.dv-test.de/search/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (Array.isArray(data) && data.length > 0) {
+                    currentData = data;
+                    renderTable(data);
+                    noResultsMessage.classList.add('hidden');
+                } else {
+                    resultsBody.innerHTML = '';
+                    noResultsMessage.classList.remove('hidden');
+                }
+            })
+            .catch(error => {
+                console.error('Fehler bei der API-Anfrage:', error);
+                resultsBody.innerHTML = '';
                 noResultsMessage.classList.remove('hidden');
-            } else {
-                noResultsMessage.classList.add('hidden');
-            }
-
-        } catch (error) {
-            console.error("Error:", error);
-            alert(`Search failed: ${error.message}`);
-            resultsBody.innerHTML = '';
-            noResultsMessage.classList.remove('hidden');
-        } finally {
-            searchButton.disabled = false;
-            searchButton.textContent = 'Search';
-        }
+            });
     }
 
-    function sortData() {
-        if (!currentSort.column) return;
-
-        currentData.sort((a, b) => {
-            const aValue = a[currentSort.column];
-            const bValue = b[currentSort.column];
-                
-            if (currentSort.column === 'zip') {
-                return (parseInt(aValue) - parseInt(bValue)) * currentSort.direction;
-            }
-            return aValue.localeCompare(bValue) * currentSort.direction;
-        });
-    }
-
-    function updateTable() {
+    function renderTable(data) {
         resultsBody.innerHTML = '';
-
-        currentData.forEach(contact => {
+        data.forEach(entry => {
             const row = document.createElement('tr');
             row.innerHTML = `
-                <td>${contact.name || '-'}</td>
-                <td>${contact.street || '-'}</td>
-                <td>${contact.city || '-'}</td>
-                <td>${contact.zip || '-'}</td>
-                <td>${contact.tel || '-'}</td>
+                <td>${entry.name}</td>
+                <td>${entry.street}</td>
+                <td>${entry.city}</td>
+                <td>${entry.zip}</td>
+                <td>${entry.tel}</td>
             `;
             resultsBody.appendChild(row);
         });
     }
+
+    function sortTableBy(column) {
+        if (currentSort.column === column) {
+            currentSort.direction *= -1;
+        } else {
+            currentSort.column = column;
+            currentSort.direction = 1;
+        }
+
+        const sortedData = [...currentData].sort((a, b) => {
+            const valA = a[column].toLowerCase();
+            const valB = b[column].toLowerCase();
+            if (valA < valB) return -1 * currentSort.direction;
+            if (valA > valB) return 1 * currentSort.direction;
+            return 0;
+        });
+
+        renderTable(sortedData);
+
+        document.querySelectorAll('.sort-icon').forEach(icon => icon.classList.remove('active'));
+        const activeIcon = document.querySelector(`th[data-column="${column}"] .sort-icon`);
+        if (activeIcon) activeIcon.classList.add('active');
+    }
+
+    // Suche beim Drücken der Enter-Taste
+    searchInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            searchContacts();
+        }
+    });
+
+    // Tabellenüberschriften klickbar machen für Sortierung
+    tableHeaders.forEach(header => {
+        header.addEventListener('click', () => {
+            const column = header.dataset.column;
+            sortTableBy(column);
+        });
+    });
 });
+
