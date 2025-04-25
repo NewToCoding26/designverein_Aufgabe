@@ -64,18 +64,35 @@ tbody tr:hover {
 }
 
 .search-box select, 
-.search-box input, 
-.search-box button {
+.search-box input {
     border-radius: 8px;
     border: 1px solid #ccc;
     padding: 6px 10px;
     color: white;
-    background-color: #04AA6D;
+    background-color: #05C776;
+    border-color: #038A55;
+}
+
+.search-box select:hover, 
+.search-box input:hover {
+    background-color: #06E286;
+    color: white;
+}
+
+.checkbox-label:hover {
+    color: #038A55;
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
 }
 
 #input-search::placeholder {
     color: white;
-    opacity: 0.7;
+    opacity: 0.8;
+    border-color: #038A55;
 }
 
 .sort-icon {
@@ -99,8 +116,9 @@ th:hover .sort-icon {
 .checkbox-label {
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 3px;
     white-space: nowrap;
+    border-radius: 6px;
 }
 
 #no-results {
