@@ -111,42 +111,37 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function sortTable(column) {
-        if (!currentData.length) return;
+        if (currentSort.column === column) {
+            currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+        } else {
+            currentSort.column = column;
+            currentSort.direction = 'asc';
+        }
 
-        const header = document.querySelector(`th[data-column="${column}"]`);
-        const dataType = header.getAttribute('data-type');
-        const direction = (currentSort.column === column && currentSort.direction === 'asc') ? 'desc' : 'asc';
-        currentSort = { column, direction };
-
-        currentData.sort((a, b) => {
-            let valA = (a[column] || '').toString().toLowerCase();
-            let valB = (b[column] || '').toString().toLowerCase();
-
-            if (dataType === 'number') {
-                valA = parseFloat(valA) || 0;
-                valB = parseFloat(valB) || 0;
-                return direction === 'asc' ? valA - valB : valB - valA;
-            }
-
-            if (valA < valB) return direction === 'asc' ? -1 : 1;
-            if (valA > valB) return direction === 'asc' ? 1 : -1;
+        const sortedData = [...currentData].sort((a, b) => {
+            const aValue = a[column] || '';
+            const bValue = b[column] || '';
+            if (aValue < bValue) return currentSort.direction === 'asc' ? -1 : 1;
+            if (aValue > bValue) return currentSort.direction === 'asc' ? 1 : -1;
             return 0;
         });
 
+        renderTable(sortedData);
         updateSortIcons();
-        renderTable(currentData);
     }
 
     function updateSortIcons() {
         tableHeaders.forEach(header => {
             const icon = header.querySelector('.sort-icon');
+            if (!icon) return;
+
             const column = header.getAttribute('data-column');
             if (column === currentSort.column) {
                 icon.classList.add('active');
-                icon.setAttribute('name', currentSort.direction === 'asc' ? 'arrow-down' : 'arrow-up');
+                icon.textContent = currentSort.direction === 'asc' ? '▲' : '▼';
             } else {
                 icon.classList.remove('active');
-                icon.setAttribute('name', 'arrow-down');
+                icon.textContent = '▲';
             }
         });
     }
