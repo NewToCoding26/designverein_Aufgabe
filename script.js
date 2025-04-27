@@ -7,102 +7,130 @@ document.addEventListener('DOMContentLoaded', () => {
     const tableHeaders = document.querySelectorAll('th[data-column]');
 
     let currentData = [];
-    let currentSort = {
-        column: null,
-        direction: 1
-    };
+    let currentSort = { column: null, direction: 'asc' };
 
-    function searchContacts() {
+    // Add event listeners for search
+    searchInput.addEventListener('input', debounce(searchContacts, 300));
+    searchField.addEventListener('change', searchContacts);
+    exactMatch.addEventListener('change', searchContacts);
+
+    // Add event listeners for sorting
+    tableHeaders.forEach(header => {
+        header.addEventListener('click', () => {
+            const column = header.getAttribute('data-column');
+            sortTable(column);
+        });
+    });
+
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+
+    async function searchContacts() {
         const criteria = searchInput.value.trim();
         const field = searchField.value;
         const condition = exactMatch.checked ? 'equals' : 'like';
 
-        if (!criteria) return;
+        if (!criteria) {
+            resultsBody.innerHTML = '';
+            noResultsMessage.classList.add('hidden');
+            return;
+        }
 
-        const payload = {
-            user: "api_azubi_test",
-            password: "dUb0SkqWH6MHXSsBAKkHmvJa",
-            field,
-            criteria,
-            condition
-        };
+        try {
+            const response = await fetch('https://azubi.dv-test.de/search/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    user: "api_azubi_test",
+                    password: "dUb0SkqWH6MHXSsBAKkHmvJa",
+                    field: field,
+                    criteria: criteria,
+                    condition: condition
+                })
+            });
 
-        fetch('https://azubi.dv-test.de/search/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(payload)
-        })
-            .then(res => res.json())
-            .then(data => {
-                if (Array.isArray(data) && data.length > 0) {
-                    currentData = data;
-                    renderTable(data);
-                    noResultsMessage.classList.add('hidden');
-                } else {
-                    resultsBody.innerHTML = '';
-                    noResultsMessage.classList.remove('hidden');
-                }
-            })
-            .catch(error => {
-                console.error('Fehler bei der API-Anfrage:', error);
+            const data = await response.json();
+
+            if (Array.isArray(data) && data.length > 0) {
+                currentData = data;
+                renderTable(data);
+                noResultsMessage.classList.add('hidden');
+            } else {
+                currentData = [];
                 resultsBody.innerHTML = '';
                 noResultsMessage.classList.remove('hidden');
-            });
+            }
+        } catch (error) {
+            console.error('Error fetching data:', error);
+            currentData = [];
+            resultsBody.innerHTML = '';
+            noResultsMessage.classList.remove('hidden');
+        }
     }
 
     function renderTable(data) {
         resultsBody.innerHTML = '';
-        data.forEach(entry => {
+
+        data.forEach(contact => {
             const row = document.createElement('tr');
             row.innerHTML = `
-                <td>${entry.name}</td>
-                <td>${entry.street}</td>
-                <td>${entry.city}</td>
-                <td>${entry.zip}</td>
-                <td>${entry.tel}</td>
+                <td>${contact.name || '-'}</td>
+                <td>${contact.street || '-'}</td>
+                <td>${contact.city || '-'}</td>
+                <td>${contact.zip || '-'}</td>
+                <td>${contact.tel || '-'}</td>
             `;
             resultsBody.appendChild(row);
         });
     }
 
-    function sortTableBy(column) {
-        if (currentSort.column === column) {
-            currentSort.direction *= -1;
-        } else {
-            currentSort.column = column;
-            currentSort.direction = 1;
-        }
+    function sortTable(column) {
+        if (!currentData.length) return;
 
-        const sortedData = [...currentData].sort((a, b) => {
-            const valA = a[column].toLowerCase();
-            const valB = b[column].toLowerCase();
-            if (valA < valB) return -1 * currentSort.direction;
-            if (valA > valB) return 1 * currentSort.direction;
+        const direction = (currentSort.column === column && currentSort.direction === 'asc') ? 'desc' : 'asc';
+        currentSort = { column, direction };
+
+        currentData.sort((a, b) => {
+            let valA = (a[column] || '').toString().toLowerCase();
+            let valB = (b[column] || '').toString().toLowerCase();
+
+            if (column === 'zip') {
+                valA = parseInt(valA) || 0;
+                valB = parseInt(valB) || 0;
+                return direction === 'asc' ? valA - valB : valB - valA;
+            }
+
+            if (valA < valB) return direction === 'asc' ? -1 : 1;
+            if (valA > valB) return direction === 'asc' ? 1 : -1;
             return 0;
         });
 
-        renderTable(sortedData);
-
-        document.querySelectorAll('.sort-icon').forEach(icon => icon.classList.remove('active'));
-        const activeIcon = document.querySelector(`th[data-column="${column}"] .sort-icon`);
-        if (activeIcon) activeIcon.classList.add('active');
+        updateSortIcons();
+        renderTable(currentData);
     }
 
-    // Suche beim Drücken der Enter-Taste
-    searchInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            searchContacts();
-        }
-    });
-
-    // Tabellenüberschriften klickbar machen für Sortierung
-    tableHeaders.forEach(header => {
-        header.addEventListener('click', () => {
-            const column = header.dataset.column;
-            sortTableBy(column);
+    function updateSortIcons() {
+        tableHeaders.forEach(header => {
+            const icon = header.querySelector('.sort-icon');
+            const column = header.getAttribute('data-column');
+            if (column === currentSort.column) {
+                icon.classList.add('active');
+                icon.setAttribute('name', currentSort.direction === 'asc' ? 'arrow-down' : 'arrow-up');
+            } else {
+                icon.classList.remove('active');
+                icon.setAttribute('name', 'arrow-down');
+            }
         });
-    });
+    }
 });
-

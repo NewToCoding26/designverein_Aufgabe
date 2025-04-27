@@ -140,7 +140,6 @@ th:hover .sort-icon {
     display: none !important;
 }
 
-/* Responsive Design */
 @media screen and (max-width: 768px) {
     body {
         font-size: 1rem;
