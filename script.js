@@ -9,18 +9,32 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentData = [];
     let currentSort = { column: null, direction: 'asc' };
 
-    // Add event listeners for search
+    loadStaticData();
+
     searchInput.addEventListener('input', debounce(searchContacts, 300));
     searchField.addEventListener('change', searchContacts);
     exactMatch.addEventListener('change', searchContacts);
 
-    // Add event listeners for sorting
     tableHeaders.forEach(header => {
         header.addEventListener('click', () => {
             const column = header.getAttribute('data-column');
             sortTable(column);
         });
     });
+
+    function loadStaticData() {
+        const rows = resultsBody.querySelectorAll('tr');
+        currentData = Array.from(rows).map(row => {
+            const cells = row.querySelectorAll('td');
+            return {
+                name: cells[0].textContent,
+                street: cells[1].textContent,
+                city: cells[2].textContent,
+                zip: cells[3].textContent,
+                tel: cells[4].textContent
+            };
+        });
+    }
 
     function debounce(func, wait) {
         let timeout;
@@ -40,7 +54,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const condition = exactMatch.checked ? 'equals' : 'like';
 
         if (!criteria) {
-            resultsBody.innerHTML = '';
+            loadStaticData();
+            renderTable(currentData);
             noResultsMessage.classList.add('hidden');
             return;
         }
@@ -98,6 +113,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function sortTable(column) {
         if (!currentData.length) return;
 
+        const header = document.querySelector(`th[data-column="${column}"]`);
+        const dataType = header.getAttribute('data-type');
         const direction = (currentSort.column === column && currentSort.direction === 'asc') ? 'desc' : 'asc';
         currentSort = { column, direction };
 
@@ -105,9 +122,9 @@ document.addEventListener('DOMContentLoaded', () => {
             let valA = (a[column] || '').toString().toLowerCase();
             let valB = (b[column] || '').toString().toLowerCase();
 
-            if (column === 'zip') {
-                valA = parseInt(valA) || 0;
-                valB = parseInt(valB) || 0;
+            if (dataType === 'number') {
+                valA = parseFloat(valA) || 0;
+                valB = parseFloat(valB) || 0;
                 return direction === 'asc' ? valA - valB : valB - valA;
             }
 
